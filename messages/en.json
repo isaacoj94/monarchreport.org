@@ -74,6 +74,13 @@
     "bill_overview": "Overview",
     "bill_voting": "Voting Results",
     "back_to_list": "Back to All Bills",
+    "risk_critical": "Critical Risk",
+    "risk_high": "High Risk",
+    "risk_moderate": "Moderate",
+    "risk_low": "Low Risk",
+    "risk_neutral": "Neutral",
+    "risk_show_flagged": "Rights Concerns",
+    "risk_showing_flagged": "Showing Flagged",
     "meta_title": "Korean Legislative Tracker — Monarch Report",
     "meta_description": "Track bills and laws moving through the Korean National Assembly. A resource for US legislators and citizens worldwide."
   },

@@ -74,6 +74,13 @@
     "bill_overview": "概要",
     "bill_voting": "投票結果",
     "back_to_list": "法案一覧に戻る",
+    "risk_critical": "危険",
+    "risk_high": "高リスク",
+    "risk_moderate": "中程度",
+    "risk_low": "低リスク",
+    "risk_neutral": "中立",
+    "risk_show_flagged": "人権懸念法案",
+    "risk_showing_flagged": "懸念法案表示中",
     "meta_title": "韓国立法トラッカー — モナークレポート",
     "meta_description": "韓国国会を通過する法案と法律を追跡。米国議員と世界中の市民のためのリソース。"
   },

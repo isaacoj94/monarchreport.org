@@ -28,6 +28,10 @@ export interface Bill {
   votingRecord?: VotingRecord;
   tags: string[];
   sourceUrl?: string;
+  // AI analysis fields (populated when ANTHROPIC_API_KEY is set)
+  riskLevel?: "critical" | "high" | "moderate" | "low" | "neutral";
+  riskReason?: { en: string; ko: string; ja: string };
+  affectedRights?: string[];
 }
 
 export interface VotingRecord {

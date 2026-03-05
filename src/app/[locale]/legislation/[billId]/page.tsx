@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchBillById } from "@/lib/assembly/client";
+import { analyzeSingleBill, RISK_COLORS, RISK_ICONS, RIGHTS_LABELS } from "@/lib/assembly/analyze";
 import type { Locale } from "@/i18n/routing";
 import type { Metadata } from "next";
 
@@ -37,6 +38,18 @@ export default async function BillDetailPage({ params }: Props) {
   const t = await getTranslations("legislation");
 
   const bill = await fetchBillById(billId);
+
+  if (bill) {
+    // Enrich with AI analysis (translations + risk scoring)
+    const analysis = await analyzeSingleBill(bill);
+    bill.title.en = analysis.titleEn;
+    bill.title.ja = analysis.titleJa;
+    bill.summary.en = analysis.summaryEn;
+    bill.summary.ja = analysis.summaryJa;
+    bill.riskLevel = analysis.riskLevel;
+    bill.riskReason = { en: analysis.riskReason, ko: analysis.riskReasonKo, ja: analysis.riskReasonJa };
+    bill.affectedRights = analysis.affectedRights;
+  }
 
   if (!bill) {
     return (
@@ -109,6 +122,35 @@ export default async function BillDetailPage({ params }: Props) {
         )}
         <p className="text-muted-foreground mt-3">{summary}</p>
       </div>
+
+      {/* Democracy Risk Assessment */}
+      {bill.riskLevel && bill.riskLevel !== "neutral" && (
+        <div className={`p-5 rounded-xl border mb-8 ${RISK_COLORS[bill.riskLevel].border} ${RISK_COLORS[bill.riskLevel].bg}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">{RISK_ICONS[bill.riskLevel]}</span>
+            <h3 className={`font-semibold ${RISK_COLORS[bill.riskLevel].text}`}>
+              {t(`risk_${bill.riskLevel}`)}
+            </h3>
+          </div>
+          {bill.riskReason && (
+            <p className="text-sm text-foreground/80 mb-3">
+              {bill.riskReason[(locale as Locale)] || bill.riskReason.en}
+            </p>
+          )}
+          {bill.affectedRights && bill.affectedRights.length > 0 && !bill.affectedRights.includes("none") && (
+            <div className="flex flex-wrap gap-2">
+              {bill.affectedRights.map((right) => {
+                const label = RIGHTS_LABELS[right];
+                return (
+                  <span key={right} className="text-xs px-2.5 py-1 rounded-full bg-background/50 text-foreground/70 border border-border">
+                    {label ? label[(locale as Locale)] || label.en : right.replace(/_/g, " ")}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Bill Info Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">

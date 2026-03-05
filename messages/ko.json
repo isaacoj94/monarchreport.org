@@ -74,6 +74,13 @@
     "bill_overview": "개요",
     "bill_voting": "표결 결과",
     "back_to_list": "전체 법안으로 돌아가기",
+    "risk_critical": "위험",
+    "risk_high": "높은 위험",
+    "risk_moderate": "보통",
+    "risk_low": "낮은 위험",
+    "risk_neutral": "중립",
+    "risk_show_flagged": "인권 우려 법안",
+    "risk_showing_flagged": "우려 법안 보기",
     "meta_title": "대한민국 입법 추적기 — 모나크 리포트",
     "meta_description": "대한민국 국회를 통과하는 법안과 법률을 추적하세요. 미국 의원과 전 세계 시민을 위한 자원."
   },

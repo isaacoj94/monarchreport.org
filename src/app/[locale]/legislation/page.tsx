@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BillList } from "@/components/features/legislation/BillList";
-import { fetchBillsWithVotes } from "@/lib/assembly/client";
+import { fetchBillsWithVotes, fetchAssemblyStats } from "@/lib/assembly/client";
+import { analyzeBills } from "@/lib/assembly/analyze";
 import type { Metadata } from "next";
 
 type Props = {
@@ -23,20 +24,42 @@ export default async function LegislationPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("legislation");
 
-  // Fetch live data from Korean National Assembly API
-  const { bills, totalCount } = await fetchBillsWithVotes({
-    age: 22,
-    page: 1,
-    size: 100,
-  });
+  // Fetch live data and stats in parallel
+  const [{ bills }, assemblyStats] = await Promise.all([
+    fetchBillsWithVotes({ age: 22, page: 1, size: 100 }),
+    fetchAssemblyStats(),
+  ]);
 
-  // Calculate stats from real data
-  const stats = {
-    total: totalCount,
-    committee: bills.filter((b) => b.status === "committee").length,
-    passed: bills.filter((b) => b.status === "passed").length,
-    rejected: bills.filter((b) => b.status === "rejected").length,
-  };
+  // Analyze bills with AI for English translations + risk scoring
+  const analyses = await analyzeBills(bills);
+
+  // Merge AI analysis into bills
+  const enrichedBills = bills.map((bill) => {
+    const analysis = analyses.get(bill.id);
+    if (analysis) {
+      return {
+        ...bill,
+        title: {
+          ko: bill.title.ko,
+          en: analysis.titleEn,
+          ja: analysis.titleJa,
+        },
+        summary: {
+          ko: bill.summary.ko,
+          en: analysis.summaryEn,
+          ja: analysis.summaryJa,
+        },
+        riskLevel: analysis.riskLevel,
+        riskReason: {
+          en: analysis.riskReason,
+          ko: analysis.riskReasonKo,
+          ja: analysis.riskReasonJa,
+        },
+        affectedRights: analysis.affectedRights,
+      };
+    }
+    return bill;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -60,10 +83,10 @@ export default async function LegislationPage({ params }: Props) {
       {/* Stats Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: t("stat_total"), value: stats.total.toLocaleString(), icon: "\uD83D\uDCCB" },
-          { label: t("stat_committee"), value: stats.committee.toString(), icon: "\uD83D\uDD0D" },
-          { label: t("stat_passed"), value: stats.passed.toString(), icon: "\u2705" },
-          { label: t("stat_rejected"), value: stats.rejected.toString(), icon: "\u274C" },
+          { label: t("stat_total"), value: assemblyStats.totalBills.toLocaleString(), icon: "\uD83D\uDCCB" },
+          { label: t("stat_committee"), value: assemblyStats.committeeCount.toLocaleString(), icon: "\uD83D\uDD0D" },
+          { label: t("stat_passed"), value: assemblyStats.passedBills.toLocaleString(), icon: "\u2705" },
+          { label: t("stat_rejected"), value: assemblyStats.rejectedBills.toLocaleString(), icon: "\u274C" },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -85,7 +108,7 @@ export default async function LegislationPage({ params }: Props) {
         {t("live_data_indicator")} &middot; {t("assembly_age")}
       </div>
 
-      <BillList bills={bills} />
+      <BillList bills={enrichedBills} />
     </div>
   );
 }
