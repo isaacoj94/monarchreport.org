@@ -187,6 +187,54 @@ export async function fetchVotingRecords(params: {
   }
 }
 
+// Fetch a single bill by BILL_ID
+export async function fetchBillById(billId: string): Promise<Bill | null> {
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+
+  const url = `${BASE_URL}/${BILL_LIST_SERVICE}?KEY=${apiKey}&Type=json&BILL_ID=${billId}`;
+
+  try {
+    const response = await fetch(url, { headers: HEADERS, next: { revalidate: 3600 } });
+    if (!response.ok) return null;
+
+    const json = await response.json();
+    const { rows } = parseApiResponse<AssemblyBillRaw>(json, BILL_LIST_SERVICE);
+
+    if (rows.length === 0) return null;
+
+    const bill = transformBill(rows[0]);
+
+    // Try to get voting record for this bill
+    const voteUrl = `${BASE_URL}/${VOTE_SERVICE}?KEY=${apiKey}&Type=json&BILL_ID=${billId}`;
+    try {
+      const voteResponse = await fetch(voteUrl, { headers: HEADERS, next: { revalidate: 3600 } });
+      if (voteResponse.ok) {
+        const voteJson = await voteResponse.json();
+        const { rows: voteRows } = parseApiResponse<AssemblyVoteRaw>(voteJson, VOTE_SERVICE);
+        if (voteRows.length > 0) {
+          const raw = voteRows[0];
+          bill.votingRecord = {
+            totalVotes: raw.VOTE_TCNT,
+            yesVotes: raw.YES_TCNT,
+            noVotes: raw.NO_TCNT,
+            abstentions: raw.BLANK_TCNT,
+            absent: raw.MEMBER_TCNT - raw.VOTE_TCNT,
+            date: raw.PROC_DT,
+          };
+        }
+      }
+    } catch {
+      // Vote record not available, that's ok
+    }
+
+    return bill;
+  } catch (error) {
+    console.error("[Assembly API] Fetch bill by ID error:", error);
+    return null;
+  }
+}
+
 // Fetch bills with voting records merged in
 export async function fetchBillsWithVotes(params: {
   age?: number;
