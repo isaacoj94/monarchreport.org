@@ -1,26 +1,167 @@
 @import "tailwindcss";
 
+/* === Monarch Report Theme === */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core Brand Colors */
+  --monarch-orange: #E8740C;
+  --monarch-orange-light: #FFB347;
+  --monarch-gold: #D4A015;
+  --monarch-cream: #FFF8F0;
+  --monarch-dark: #0A0A0A;
+  --watchdog-red: #B91C1C;
+
+  /* Light Mode */
+  --background: #FAFAF7;
+  --foreground: #0A0A0A;
+  --card: #FFFFFF;
+  --card-foreground: #0A0A0A;
+  --border: #E5E2D9;
+  --muted: #F5F3EE;
+  --muted-foreground: #6B6961;
+  --accent: #E8740C;
+  --accent-foreground: #FFFFFF;
+  --ring: #E8740C;
+}
+
+.dark {
+  --background: #0A0A0A;
+  --foreground: #F5F3EE;
+  --card: #141414;
+  --card-foreground: #F5F3EE;
+  --border: #2A2A2A;
+  --muted: #1A1A1A;
+  --muted-foreground: #9CA3AF;
+  --accent: #E8740C;
+  --accent-foreground: #FFFFFF;
+  --ring: #E8740C;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-monarch-orange: var(--monarch-orange);
+  --color-monarch-orange-light: var(--monarch-orange-light);
+  --color-monarch-gold: var(--monarch-gold);
+  --color-monarch-cream: var(--monarch-cream);
+  --color-monarch-dark: var(--monarch-dark);
+  --color-watchdog-red: var(--watchdog-red);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* === Base Styles === */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', 'Noto Sans KR', 'Noto Sans JP', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* === Selection === */
+::selection {
+  background: rgba(232, 116, 12, 0.2);
+  color: inherit;
+}
+
+/* === React Tweet Overrides === */
+[data-theme="light"] .react-tweet-theme {
+  --tweet-bg-color: var(--card) !important;
+  --tweet-border: 1px solid var(--border) !important;
+}
+[data-theme="dark"] .react-tweet-theme {
+  --tweet-bg-color: var(--card) !important;
+  --tweet-border: 1px solid var(--border) !important;
+}
+
+/* === Monarch Glow Effect === */
+.monarch-glow {
+  box-shadow: 0 0 20px rgba(232, 116, 12, 0.1),
+              0 0 60px rgba(232, 116, 12, 0.05);
+}
+
+.monarch-glow-strong {
+  box-shadow: 0 0 20px rgba(232, 116, 12, 0.2),
+              0 0 60px rgba(232, 116, 12, 0.1);
+}
+
+/* === Heading Font === */
+.font-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* === Glassmorphism Card === */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* === Status Badge Colors === */
+.status-proposed { background: #3B82F6; color: white; }
+.status-committee { background: #F59E0B; color: white; }
+.status-plenary { background: #E8740C; color: white; }
+.status-passed { background: #10B981; color: white; }
+.status-rejected { background: #EF4444; color: white; }
+.status-withdrawn { background: #6B7280; color: white; }
+.status-promulgated { background: #8B5CF6; color: white; }
+
+/* === Animations === */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes wing-flap {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.8); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* === Link Underline Effect === */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--monarch-orange);
+  transition: width 0.3s ease;
+}
+.link-underline:hover::after {
+  width: 100%;
 }
